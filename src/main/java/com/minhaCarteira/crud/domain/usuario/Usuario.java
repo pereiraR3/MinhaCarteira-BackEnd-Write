@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
-@Table(name = "Usuario", schema = "dbo")
+@Table(name = "usuario", schema = "dbo")
 @Builder
 public class Usuario {
 
