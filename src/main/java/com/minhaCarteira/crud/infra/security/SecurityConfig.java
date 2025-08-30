@@ -50,7 +50,19 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/error/", "/h2-console/").permitAll()
-                        .requestMatchers("/api/**").permitAll()
+
+                        // Config routes user
+                        .requestMatchers(HttpMethod.POST, "/api/usuario/create").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/usuario/update").hasAnyRole("ADMIN", "VISITANTE")
+                        .requestMatchers(HttpMethod.DELETE, "/api/usuario/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/usuario/{id}").hasAnyRole("ADMIN", "VISITANTE")
+                        .requestMatchers(HttpMethod.GET, "/api/usuario/findByFilter").hasRole("ADMIN")
+
+
+                        // Config routes auth
+                        .requestMatchers(HttpMethod.POST, "/api/auth/authenticate").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
+
                         .anyRequest().permitAll()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
