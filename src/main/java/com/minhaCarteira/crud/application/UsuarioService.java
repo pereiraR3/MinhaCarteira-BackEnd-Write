@@ -65,7 +65,7 @@ public class UsuarioService {
 
         Pageable pageable = PageRequest.of(query.getPageNumber(), query.getPageSize());
 
-        Specification<Usuario> spec = construirSpecification(filter.nome(), filter.email());
+        Specification<Usuario> spec = construirSpecification(filter.nome(), filter.email(), filter.id());
 
         Page<Usuario> usuariosPage = usuarioRepository.findAll(spec, pageable);
 
@@ -76,20 +76,23 @@ public class UsuarioService {
 
     /**
      * Função que centraliza a lógica de construção da query dinâmica.
-     * @param nome e email com os filtros a serem aplicados.
+     * @param nome, email e id representados como filtros a serem aplicados.
      * @return A Specification<Usuario> combinada.
      */
-    private Specification<Usuario> construirSpecification(String nome, String email) {
+    private Specification<Usuario> construirSpecification(String nome, String email, Integer id) {
         List<Specification<Usuario>> specifications = new ArrayList<>();
 
         if (StringUtils.hasText(nome))
             specifications.add((root, criteriaQuery, criteriaBuilder) ->
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("Nome")), "%" + nome.toLowerCase() + "%"));
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("nome")), "%" + nome.toLowerCase() + "%"));
 
         if (StringUtils.hasText(email))
             specifications.add((root, criteriaQuery, criteriaBuilder) ->
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("Email")), "%" + email.toLowerCase() + "%"));
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), "%" + email.toLowerCase() + "%"));
 
+        if (id != null)
+            specifications.add((root, criteriaQuery, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("id"), id));
 
         return Specification.allOf(specifications);
     }
