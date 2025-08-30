@@ -52,12 +52,12 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/error/", "/h2-console/").permitAll()
 
                         // Config routes user
+                        // Config routes user
                         .requestMatchers(HttpMethod.POST, "/api/usuario/create").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/usuario/update").hasAnyRole("ADMIN", "VISITANTE")
-                        .requestMatchers(HttpMethod.DELETE, "/api/usuario/{id}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/usuario/{id}").hasAnyRole("ADMIN", "VISITANTE")
-                        .requestMatchers(HttpMethod.GET, "/api/usuario/findByFilter").hasRole("ADMIN")
-
+                        .requestMatchers(HttpMethod.PUT, "/api/usuario/update").hasAnyAuthority("SCOPE_ROLE_ADMIN", "SCOPE_ROLE_VISITANTE")
+                        .requestMatchers(HttpMethod.DELETE, "/api/usuario/{id}").hasAuthority("SCOPE_ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/usuario/{id}").hasAnyAuthority("SCOPE_ROLE_ADMIN", "SCOPE_ROLE_VISITANTE")
+                        .requestMatchers(HttpMethod.GET, "/api/usuario/findByFilter").hasAuthority("SCOPE_ROLE_ADMIN")
 
                         // Config routes auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/authenticate").permitAll()
