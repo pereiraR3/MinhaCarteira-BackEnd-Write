@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS dbo.usuario (
+    id SERIAL PRIMARY KEY,
+    nome  VARCHAR(100) NOT NULL,
+    email VARCHAR(125) UNIQUE NOT NULL,
+    senha VARCHAR(60) NOT NULL,
+    roles VARCHAR(20)[] NOT NULL
+);
+
