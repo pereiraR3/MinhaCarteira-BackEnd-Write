@@ -20,40 +20,44 @@ public class JwtService {
         this.jwtEncoder = jwtEncoder;
     }
 
+    /**
+     * Gera o Access Token contendo as permissões (authorities) do usuário.
+     */
     public String generateToken(Authentication authentication){
         Instant now = Instant.now();
         long expiry = 7200L; // 2H
 
-        String scopes = authentication.getAuthorities()
+        var authorities = authentication.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(", "));
+                .collect(Collectors.toList());
 
         var claims = JwtClaimsSet.builder()
                 .issuer("security-jwt")
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(expiry))
                 .subject(authentication.getName())
-                .claim("scope", scopes)
+                .claim("authorities", authorities)
                 .build();
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
 
-    public String generateRefreshToken(String siape){
+    /**
+     * Gera o Refresh Token, que não precisa de claims de permissão.
+     */
+    public String generateRefreshToken(String email) {
         Instant now = Instant.now();
-        long expiry = 7200L;
+        long expiry = 86400L; // 24 horas
 
         var claims = JwtClaimsSet.builder()
                 .issuer("security-jwt")
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(expiry))
-                .subject(siape)
-                .claim("scope", "refresh_token")
+                .subject(email)
                 .build();
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
-
     }
 
 }
