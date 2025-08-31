@@ -42,19 +42,37 @@ public class UsuarioService {
     @Transactional
     public UsuarioResponseDTO create(UsuarioRequestDTO body) {
 
+        checkIfEmailExists(body.email(), null);
+
         String passwordEncripty = passwordEncoder.encode(body.senha());
 
         Usuario usuario = Usuario.builder()
                 .nome(body.nome())
                 .email(body.email())
                 .senha(passwordEncripty)
-                .roleList(List.of(UsuarioRole.ROLE_VISITANTE))
+                .roleList(List.of(UsuarioRole.VISITANTE))
                 .build();
 
         usuarioRepository.save(usuario);
 
         return new UsuarioResponseDTO(usuario.getId(), usuario.getNome(), usuario.getEmail());
 
+    }
+
+    /**
+     * Valida se um e-mail já está em uso por outro usuário.
+     * @param email O e-mail a ser verificado.
+     * @param currentUserId O ID do usuário atual.
+     */
+    private void checkIfEmailExists(String email, Integer currentUserId) {
+        Optional<Usuario> userOptional = usuarioRepository.findByEmail(email);
+
+        if (userOptional.isPresent()) {
+            Usuario existingUser = userOptional.get();
+            if (currentUserId == null || !existingUser.getId().equals(currentUserId)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail já cadastrado no sistema.");
+            }
+        }
     }
 
     /**
@@ -103,6 +121,9 @@ public class UsuarioService {
      */
     public void update(UsuarioUpdateDTO updateDTO) {
         Usuario usuario = findById(updateDTO.id());
+
+        if (StringUtils.hasText(updateDTO.email()))
+            checkIfEmailExists(updateDTO.email(), updateDTO.id());
 
         Optional.ofNullable(updateDTO.nome()).ifPresent(usuario::setNome);
         Optional.ofNullable(updateDTO.email()).ifPresent(usuario::setEmail);
