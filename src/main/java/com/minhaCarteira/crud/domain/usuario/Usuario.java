@@ -6,6 +6,8 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.minhaCarteira.crud.domain.gasto.Gasto;
+
 @Entity
 @Getter
 @Setter
@@ -32,5 +34,8 @@ public class Usuario {
 
     @Column(name = "senha")
     private String senha;
+
+    @OneToMany(mappedBy = "usuario")
+    private List<Gasto> gastos;
 
 }
