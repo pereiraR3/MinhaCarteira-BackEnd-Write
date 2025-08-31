@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -43,7 +44,7 @@ public class UsuarioController {
     @PostMapping("/create")
     public ResponseEntity<UsuarioResponseDTO> create(@RequestBody @Valid UsuarioRequestDTO body, UriComponentsBuilder uriComponentsBuilder) {
         UsuarioResponseDTO userResponseDTO = usuarioService.create(body);
-        var uri = uriComponentsBuilder.path("/user/{id}").buildAndExpand(userResponseDTO.id()).toUri();
+        var uri = uriComponentsBuilder.path("/usuario/{id}").buildAndExpand(userResponseDTO.id()).toUri();
         return ResponseEntity.created(uri).body(userResponseDTO);
     }
 
@@ -72,7 +73,8 @@ public class UsuarioController {
             @ApiResponse(responseCode = "404", description = "Nenhum usuário encontrado."),
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
-    @GetMapping("/findByFilter")
+    @GetMapping("/find-by-filter")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<UsuarioResponseDTO>> findByFilter(
             @ParameterObject @PageableDefault(sort = "nome", direction = Sort.Direction.ASC) Pageable pageable,
             @ParameterObject UsuarioByFilterDTO usuarioByFilterDTO
@@ -92,6 +94,7 @@ public class UsuarioController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteById(@PathVariable Integer id) {
         usuarioService.deleteById(id);
         return ResponseEntity.noContent().build();
@@ -107,11 +110,10 @@ public class UsuarioController {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
     })
     @PutMapping(path = "/update")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VISITANTE') or authentication.name == #dto.email()")
     public ResponseEntity<?> update(@RequestBody @Valid UsuarioUpdateDTO dto) {
         usuarioService.update(dto);
         return ResponseEntity.noContent().build();
     }
-
-
 
 }
