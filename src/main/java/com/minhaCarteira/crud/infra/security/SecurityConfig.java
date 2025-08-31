@@ -9,8 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -21,6 +21,8 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
 import java.security.interfaces.RSAPrivateKey;
@@ -28,6 +30,7 @@ import java.security.interfaces.RSAPublicKey;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -48,26 +51,38 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/error/", "/h2-console/").permitAll()
 
                         // Config routes user
-                        // Config routes user
                         .requestMatchers(HttpMethod.POST, "/api/usuario/create").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/usuario/update").hasAnyAuthority("SCOPE_ROLE_ADMIN", "SCOPE_ROLE_VISITANTE")
-                        .requestMatchers(HttpMethod.DELETE, "/api/usuario/{id}").hasAuthority("SCOPE_ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/usuario/{id}").hasAnyAuthority("SCOPE_ROLE_ADMIN", "SCOPE_ROLE_VISITANTE")
-                        .requestMatchers(HttpMethod.GET, "/api/usuario/findByFilter").hasAuthority("SCOPE_ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/usuario/update").hasAnyRole("ADMIN", "VISITANTE")
+                        .requestMatchers(HttpMethod.DELETE, "/api/usuario/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/usuario/{id}").hasAnyRole("ADMIN", "VISITANTE")
+                        .requestMatchers(HttpMethod.GET, "/api/usuario/find-by-filter").hasRole("ADMIN")
 
                         // Config routes auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/authenticate").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
 
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+                .oauth2ResourceServer(oauth2 ->
+                        oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
 
         return http.build();
+    }
+
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+
+        grantedAuthoritiesConverter.setAuthoritiesClaimName("authorities");
+
+        grantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
+
+        JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
+        jwtConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+        return jwtConverter;
     }
 
     @Bean
@@ -89,3 +104,4 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 }
+
