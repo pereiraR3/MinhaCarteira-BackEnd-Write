@@ -12,5 +12,6 @@ public record GastoResponseDTO(
         LocalDateTime data,
         LocalDateTime dataCriacao,
         Integer categoriaId,
+        String categoriaNome,
         Integer usuarioId
 ){ }

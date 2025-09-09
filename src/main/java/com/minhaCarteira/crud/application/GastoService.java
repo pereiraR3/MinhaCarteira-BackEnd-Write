@@ -123,6 +123,7 @@ public class GastoService {
 				gasto.getData(),
 				gasto.getDataCriacao(),
 				gasto.getCategoria() != null ? gasto.getCategoria().getId() : null,
+				gasto.getCategoria() != null ? gasto.getCategoria().getNome() : null,
 				gasto.getUsuario() != null ? gasto.getUsuario().getId() : null
 		);
 	}
