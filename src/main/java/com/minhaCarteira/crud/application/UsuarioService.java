@@ -138,7 +138,19 @@ public class UsuarioService {
      */
     public Usuario findById(Integer id) {
         return usuarioRepository.findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "User de ID: " + id + " não encontrado!"));
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário de ID: " + id + " não encontrado!"));
+    }
+
+    /**
+     * Método usado para buscar por um usuário pelo seu email
+     * @param email
+     * @return
+     */
+    public UsuarioResponseDTO findByEmail(String email) {
+        var usuario = usuarioRepository.findByEmail(email.trim().toLowerCase()).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário de email: " + email + " não encontrado!"));
+
+        return new UsuarioResponseDTO(usuario.getId(), usuario.getNome(), usuario.getEmail());
     }
 
     /**

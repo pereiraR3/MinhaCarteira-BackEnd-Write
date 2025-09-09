@@ -65,6 +65,21 @@ public class UsuarioController {
     }
 
     @Operation(
+            summary = "Listagem de um único usuário.",
+            description = "Lista um único usuário com base no Email fornecido."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuário encontrado com sucesso."),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado."),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
+    })
+    @GetMapping("/search-by-email/{email}")
+    public ResponseEntity<UsuarioResponseDTO> findByEmail(@PathVariable String email) {
+        var usuarioDto = usuarioService.findByEmail(email);
+        return ResponseEntity.ok().body(usuarioDto);
+    }
+
+    @Operation(
             summary = "Listagem de todos os usuários.",
             description = "Lista todos os usuários registrados."
     )
