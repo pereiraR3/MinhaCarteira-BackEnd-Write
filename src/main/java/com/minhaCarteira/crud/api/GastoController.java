@@ -15,7 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -85,7 +84,6 @@ public class GastoController {
 			@ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
 	})
 	@DeleteMapping("/{id}")
-	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> deleteById(@PathVariable Integer id) {
 		gastoService.deleteById(id);
 		return ResponseEntity.noContent().build();
@@ -98,7 +96,6 @@ public class GastoController {
 			@ApiResponse(responseCode = "500", description = "Erro interno do servidor.")
 	})
 	@PutMapping(path = "/update")
-	@PreAuthorize("hasAnyRole('ADMIN','VISITANTE')")
 	public ResponseEntity<?> update(@RequestBody @Valid GastoUpdateDTO dto) {
 		gastoService.update(dto);
 		return ResponseEntity.noContent().build();
