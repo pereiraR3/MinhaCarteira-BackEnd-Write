@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +25,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class GastoController {
 
 	private final GastoService gastoService;
+	private static final Logger logger = LoggerFactory.getLogger(GastoController.class);
 
 	public GastoController(GastoService gastoService) {
 		this.gastoService = gastoService;
@@ -36,7 +39,9 @@ public class GastoController {
 	})
 	@PostMapping("/create")
 	public ResponseEntity<GastoResponseDTO> create(@RequestBody @Valid GastoRequestDTO body, UriComponentsBuilder uriComponentsBuilder) {
+		logger.info("Recebida requisição para criação de gasto: {}", body);
 		GastoResponseDTO response = gastoService.create(body);
+		logger.info("Gasto criado com sucesso: ID = {}", response.id());
 		var uri = uriComponentsBuilder.path("/gasto/{id}").buildAndExpand(response.id()).toUri();
 		return ResponseEntity.created(uri).body(response);
 	}
@@ -50,6 +55,12 @@ public class GastoController {
 	@GetMapping("/{id}")
 	public ResponseEntity<GastoResponseDTO> findById(@PathVariable Integer id) {
 		var gasto = gastoService.findById(id);
+
+		if (gasto == null)
+			logger.warn("Gasto com ID {} não encontrado.", id);
+		else
+			logger.info("Gasto encontrado com ID {}: valor = {}", id, gasto.getValor());
+
 		GastoResponseDTO dto = new GastoResponseDTO(
 				gasto.getId(),
 				gasto.getValor(),
@@ -74,7 +85,9 @@ public class GastoController {
 			@ParameterObject @PageableDefault(sort = "data", direction = Sort.Direction.DESC) Pageable pageable,
 			@ParameterObject GastoByFilterDTO gastoByFilterDTO
 	) {
+		logger.info("Recebida requisição para listar gastos com filtro: {} e paginação: {}", gastoByFilterDTO, pageable);
 		Page<GastoResponseDTO> page = gastoService.findByFilter(pageable, gastoByFilterDTO);
+		logger.info("Listagem de gastos retornou {} registros.", page.getTotalElements());
 		return ResponseEntity.ok().body(page);
 	}
 
@@ -86,7 +99,9 @@ public class GastoController {
 	})
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteById(@PathVariable Integer id) {
+		logger.info("Recebida requisição para deletar gasto com ID: {}", id);
 		gastoService.deleteById(id);
+		logger.info("Gasto com ID {} deletado com sucesso.", id);
 		return ResponseEntity.noContent().build();
 	}
 
@@ -98,7 +113,9 @@ public class GastoController {
 	})
 	@PutMapping(path = "/update")
 	public ResponseEntity<?> update(@RequestBody @Valid GastoUpdateDTO dto) {
+		logger.info("Recebida requisição para atualização de gasto: {}", dto);
 		gastoService.update(dto);
+		logger.info("Gasto com ID {} atualizado com sucesso.", dto.id());
 		return ResponseEntity.noContent().build();
 	}
 
