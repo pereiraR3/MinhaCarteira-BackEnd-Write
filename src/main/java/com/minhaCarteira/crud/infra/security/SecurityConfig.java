@@ -60,6 +60,17 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/usuario/{id}").hasAnyRole("ADMIN", "VISITANTE")
                         .requestMatchers(HttpMethod.GET, "/api/usuario/find-by-filter").hasRole("ADMIN")
 
+                        // Config routes gasto
+                        .requestMatchers(HttpMethod.POST, "/api/gasto/create").hasAnyRole("ADMIN", "VISITANTE")
+                        .requestMatchers(HttpMethod.PUT, "/api/gasto/update").hasAnyRole("ADMIN", "VISITANTE")
+                        .requestMatchers(HttpMethod.DELETE, "/api/gasto/{id}").hasAnyRole("ADMIN", "VISITANTE")
+                        .requestMatchers(HttpMethod.GET, "/api/gasto/{id}").hasAnyRole("ADMIN", "VISITANTE")
+                        .requestMatchers(HttpMethod.GET, "/api/gasto/find-by-filter").hasAnyRole("ADMIN", "VISITANTE")
+
+                        // Config routes categoria
+                        .requestMatchers(HttpMethod.GET, "/api/categoria/find-by-filter").hasAnyRole("ADMIN", "VISITANTE")
+                        .requestMatchers(HttpMethod.GET, "/api/categoria/{id}").hasAnyRole("ADMIN", "VISITANTE")
+
                         // Config routes auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/authenticate").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
