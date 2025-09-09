@@ -16,12 +16,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("api/categoria")
 public class CategoriaController {
 
     private final CategoriaService categoriaService;
+    private static final Logger logger = LoggerFactory.getLogger(CategoriaController.class);
 
     public CategoriaController(CategoriaService categoriaService) {
         this.categoriaService = categoriaService;
@@ -37,7 +40,9 @@ public class CategoriaController {
             @ParameterObject @PageableDefault(sort = "data", direction = Sort.Direction.DESC) Pageable pageable,
             @ParameterObject CategoriaByFilterDTO categoriaByFilterDTO
     ) {
+        logger.info("Recebida requisição para listagem de categorias com filtro: {} e paginação: {}", categoriaByFilterDTO, pageable);
         Page<CategoriaResponseDTO> page = categoriaService.findByFilter(pageable, categoriaByFilterDTO);
+        logger.info("Listagem de categorias retornou {} resultados.", page.getTotalElements());
         return ResponseEntity.ok().body(page);
     }
 
@@ -50,6 +55,11 @@ public class CategoriaController {
     @GetMapping("/{id}")
     public ResponseEntity<CategoriaResponseDTO> findById(@PathVariable Integer id) {
         var categoriaDto = categoriaService.findById(id);
+
+        if (categoriaDto != null)
+            logger.info("Categoria encontrada: {}", categoriaDto);
+        else
+            logger.warn("Categoria com ID {} não foi encontrada.", id);
 
         return ResponseEntity.ok().body(categoriaDto);
     }
