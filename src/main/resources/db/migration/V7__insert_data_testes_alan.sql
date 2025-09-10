@@ -3,7 +3,7 @@ VALUES (
     'alan',
     'alanbmc00@gmail.com',
     '$2a$12$Hk/QgNlII1W.qzBCKv8ixOe4Shvp5FqikAu8.oS2HGobAvG4S4oye',
-    ARRAY['VISITANTE', 'ADMIN']
+    ARRAY['USER', 'ADMIN']
 )
 ON CONFLICT (email) DO NOTHING;
 

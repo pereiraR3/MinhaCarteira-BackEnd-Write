@@ -7,6 +7,7 @@ import com.minhaCarteira.crud.domain.usuario.DTOs.UsuarioUpdateDTO;
 import com.minhaCarteira.crud.domain.usuario.Usuario;
 import com.minhaCarteira.crud.domain.usuario.UsuarioRole;
 import com.minhaCarteira.crud.domain.usuario.repository.UsuarioRepository;
+import com.minhaCarteira.crud.infra.security.service.KeycloakUserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,10 +29,15 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final KeycloakUserService keycloakUserService;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public UsuarioService(
+            UsuarioRepository usuarioRepository,
+            PasswordEncoder passwordEncoder,
+            KeycloakUserService keycloakUserService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.keycloakUserService = keycloakUserService;
     }
 
     /**
@@ -50,8 +56,13 @@ public class UsuarioService {
                 .nome(body.nome())
                 .email(body.email())
                 .senha(passwordEncripty)
-                .roleList(List.of(UsuarioRole.VISITANTE))
+                .roleList(List.of(UsuarioRole.USER))
                 .build();
+
+        keycloakUserService.createUser(
+                body.email(), body.email(),
+                body.nome(), body.nome(),
+                body.senha());
 
         usuarioRepository.save(usuario);
 

@@ -1,10 +1,6 @@
 package com.minhaCarteira.crud.infra.security;
 
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -17,16 +13,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
-
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 
 @Configuration
 @EnableWebSecurity
@@ -39,11 +26,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Value("${jwt.public.key}")
-    private RSAPublicKey pub;
-
-    @Value("${jwt.private.key}")
-    private RSAPrivateKey priv;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -55,22 +37,22 @@ public class SecurityConfig {
 
                         // Config routes user
                         .requestMatchers(HttpMethod.POST, "/api/usuario/create").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/usuario/update").hasAnyRole("ADMIN", "VISITANTE")
+                        .requestMatchers(HttpMethod.PUT, "/api/usuario/update").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.DELETE, "/api/usuario/{id}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/usuario/search-by-email/{email}").hasAnyRole("ADMIN", "VISITANTE")
-                        .requestMatchers(HttpMethod.GET, "/api/usuario/{id}").hasAnyRole("ADMIN", "VISITANTE")
+                        .requestMatchers(HttpMethod.GET, "/api/usuario/search-by-email/{email}").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.GET, "/api/usuario/{id}").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.GET, "/api/usuario/find-by-filter").hasRole("ADMIN")
 
                         // Config routes gasto
-                        .requestMatchers(HttpMethod.POST, "/api/gasto/create").hasAnyRole("ADMIN", "VISITANTE")
-                        .requestMatchers(HttpMethod.PUT, "/api/gasto/update").hasAnyRole("ADMIN", "VISITANTE")
-                        .requestMatchers(HttpMethod.DELETE, "/api/gasto/{id}").hasAnyRole("ADMIN", "VISITANTE")
-                        .requestMatchers(HttpMethod.GET, "/api/gasto/{id}").hasAnyRole("ADMIN", "VISITANTE")
-                        .requestMatchers(HttpMethod.GET, "/api/gasto/find-by-filter").hasAnyRole("ADMIN", "VISITANTE")
+                        .requestMatchers(HttpMethod.POST, "/api/gasto/create").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.PUT, "/api/gasto/update").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/gasto/{id}").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.GET, "/api/gasto/{id}").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.GET, "/api/gasto/find-by-filter").hasAnyRole("ADMIN", "USER")
 
                         // Config routes categoria
-                        .requestMatchers(HttpMethod.GET, "/api/categoria/find-by-filter").hasAnyRole("ADMIN", "VISITANTE")
-                        .requestMatchers(HttpMethod.GET, "/api/categoria/{id}").hasAnyRole("ADMIN", "VISITANTE")
+                        .requestMatchers(HttpMethod.GET, "/api/categoria/find-by-filter").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.GET, "/api/categoria/{id}").hasAnyRole("ADMIN", "USER")
 
                         // Config routes auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/authenticate").permitAll()
@@ -79,36 +61,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 ->
-                        oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+                        oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(new JwtConverter())));
 
         return http.build();
-    }
-
-    @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-
-        grantedAuthoritiesConverter.setAuthoritiesClaimName("authorities");
-
-        grantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
-
-        JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
-        jwtConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
-        return jwtConverter;
-    }
-
-    @Bean
-    JwtDecoder jwtDecoder(){
-        return NimbusJwtDecoder.withPublicKey(pub).build();
-    }
-
-    @Bean
-    JwtEncoder jwtEncoder() {
-        var jwk = new RSAKey.Builder(pub)
-                .privateKey(priv)
-                .build();
-        var jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
-        return new NimbusJwtEncoder(jwks);
     }
 
     @Bean
