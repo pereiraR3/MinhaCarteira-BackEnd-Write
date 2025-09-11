@@ -41,13 +41,9 @@ public class AuthenticationController {
     public AuthenticationController() {
     }
 
-    @Operation(
-            summary = "Autenticação de Usuário",
-            description = "Autentica um usuário com o email + senha, retornando um token de acesso e um refresh token"
-    )
+    @Operation(summary = "Autenticação de Usuário", description = "Autentica um usuário com o email + senha, retornando um token de acesso e um refresh token")
     @PostMapping("/authenticate")
-    public ResponseEntity<String> authenticate(@Valid @RequestBody UsuarioLoginDTO usuarioLoginDTO)
-    {
+    public ResponseEntity<String> authenticate(@Valid @RequestBody UsuarioLoginDTO usuarioLoginDTO) {
         HttpHeaders headers = new HttpHeaders();
         RestTemplate rt = new RestTemplate();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -62,17 +58,15 @@ public class AuthenticationController {
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(formData, headers);
 
         var result = rt.postForEntity(keyClockUrl, entity, String.class);
+        
+        logger.info("Usuário {} autenticado com sucesso.", usuarioLoginDTO.email());
 
         return result;
     }
 
-    @Operation(
-            summary = "Renovar token de acesso",
-            description = "Gera um novo token de acesso com base em um refresh token válido."
-    )
+    @Operation(summary = "Renovar token de acesso", description = "Gera um novo token de acesso com base em um refresh token válido.")
     @PostMapping("/refresh")
-    public ResponseEntity<String> refresh(@Valid @RequestBody RefreshTokenRequestDTO refreshTokenRequestDTO)
-    {
+    public ResponseEntity<String> refresh(@Valid @RequestBody RefreshTokenRequestDTO refreshTokenRequestDTO) {
 
         HttpHeaders headers = new HttpHeaders();
         RestTemplate rt = new RestTemplate();
@@ -87,6 +81,8 @@ public class AuthenticationController {
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(formData, headers);
 
         var result = rt.postForEntity(keyClockUrl, entity, String.class);
+
+        logger.info("Token renovado com sucesso.");
 
         return result;
 
