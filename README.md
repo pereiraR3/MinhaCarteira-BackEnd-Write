@@ -168,3 +168,4 @@ POST /api/gasto/create
 ---
 
 Projeto desenvolvido para a disciplina de **Sistemas Distribuídos**.
+**Desenvolvido por**: Vinícius P. Vieira, Anthony Ricardo e Alan Bruno.
