@@ -1,6 +1,9 @@
-FROM quay.io/keycloak/keycloak:latest
+FROM eclipse-temurin:17-jre-jammy
 
-ENV KEYCLOAK_ADMIN=admin
-ENV KEYCLOAK_ADMIN_PASSWORD=admin123
+ARG JAR_FILE=target/*.jar
 
-ENTRYPOINT ["/opt/keycloak/bin/kc.sh", "start-dev"]
+COPY ${JAR_FILE} app.jar
+
+EXPOSE 8082
+
+ENTRYPOINT ["java", "-jar", "/app.jar"]
