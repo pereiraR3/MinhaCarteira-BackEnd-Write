@@ -2,7 +2,7 @@
 <configuration>
 
     <property name="LOG_DIR" value="logs" />
-    <property name="APP_NAME" value="aplicacao-crud" />
+    <property name="APP_NAME" value="aplicacao-write" />
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -21,7 +21,7 @@
         </encoder>
     </appender>
 
-    <logger name="com.minhaCarteira.crud" level="INFO" additivity="false">
+    <logger name="com.minhaCarteira.write" level="INFO" additivity="false">
         <appender-ref ref="FILE" />
     </logger>
 
