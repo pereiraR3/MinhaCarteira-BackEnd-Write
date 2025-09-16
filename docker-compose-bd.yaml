@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: xswcde122123
-      POSTGRES_DB: main
+      POSTGRES_DB: db_minhaCarteira
     ports:
       - "5433:5432"
     volumes:
